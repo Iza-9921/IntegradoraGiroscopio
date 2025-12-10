@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.juego.ui.screens.LoginScreen
+import com.example.juego.ui.screens.MenuScreen
 import com.example.juego.ui.screens.RegisterScreen
 import com.example.juego.ui.viewmodel.LoginViewModel
 
@@ -20,6 +21,7 @@ fun AppNavigation() {
             LoginScreen(viewModel = vm, navController = navController)
         }
         composable("register") { RegisterScreen(navController) }
+        composable("menu") { MenuScreen(navController) }
 
 
     }
