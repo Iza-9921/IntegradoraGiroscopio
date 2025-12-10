@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -51,6 +52,9 @@ fun GamePlayScreen(navController: NavController) {
     val gameViewModel: GameViewModel = viewModel()
     val sensorPermissionState = rememberPermissionState(Manifest.permission.BODY_SENSORS)
     val platformOffset by gameViewModel.platformOffset.collectAsState()
+    val ballPosition by gameViewModel.ballPosition.collectAsState()
+    val score by gameViewModel.score.collectAsState()
+    val isGameOver by gameViewModel.isGameOver.collectAsState()
 
     LaunchedEffect(Unit) {
         sensorPermissionState.launchPermissionRequest()
@@ -58,6 +62,7 @@ fun GamePlayScreen(navController: NavController) {
 
     Box(modifier = Modifier.fillMaxSize()) {
         Canvas(modifier = Modifier.fillMaxSize()) {
+            gameViewModel.setScreenSize(size.width, size.height)
             val platformWidth = 300f
             val platformHeight = 50f
             val platformY = size.height - platformHeight
@@ -68,6 +73,29 @@ fun GamePlayScreen(navController: NavController) {
                 topLeft = Offset(x = (size.width - platformWidth) / 2 + platformOffset.x, y = platformY),
                 size = androidx.compose.ui.geometry.Size(platformWidth, platformHeight)
             )
+
+            // Dibuja la bola
+            drawCircle(
+                color = Color.Red,
+                radius = 20f,
+                center = ballPosition
+            )
+        }
+
+        if (isGameOver) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "Game Over", color = Color.Black)
+                Text(text = "Puntuación: $score", color = Color.Black)
+                Button(onClick = { gameViewModel.restartGame() }) {
+                    Text("Reiniciar")
+                }
+            }
+        } else {
+            Text(text = "Puntuación: $score", modifier = Modifier.padding(16.dp), color = Color.Black)
         }
     }
 }
