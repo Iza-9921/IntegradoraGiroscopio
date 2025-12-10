@@ -29,10 +29,10 @@ fun MenuScreen(navController: NavController) {
         Title("Torre de Equilibrio")
 
         Button(
-            onClick = { /* TODO: Navegar a la pantalla del juego */ },
+            onClick = { navController.navigate("game") },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Iniciar juego")
+            Text("Iniciar Juego")
         }
 
         Button(

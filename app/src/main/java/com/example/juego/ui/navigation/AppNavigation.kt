@@ -5,6 +5,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.juego.ui.screens.GameMenuScreen
+import com.example.juego.ui.screens.GamePlayScreen
 import com.example.juego.ui.screens.LoginScreen
 import com.example.juego.ui.screens.MenuScreen
 import com.example.juego.ui.screens.RegisterScreen
@@ -22,6 +24,8 @@ fun AppNavigation() {
         }
         composable("register") { RegisterScreen(navController) }
         composable("menu") { MenuScreen(navController) }
+        composable("game") { GameMenuScreen(navController) }
+        composable("gameplay") { GamePlayScreen(navController) }
 
 
     }
