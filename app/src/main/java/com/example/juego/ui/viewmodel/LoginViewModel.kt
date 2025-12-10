@@ -1,40 +1,19 @@
 package com.example.juego.ui.viewmodel
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.juego.ui.state.LoginUiState
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 class LoginViewModel : ViewModel() {
+    var password = mutableStateOf("")
+    var username = mutableStateOf("")
+    var loginError = mutableStateOf("")
 
-    private val _uiState = MutableStateFlow(LoginUiState())
-    val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
-
-    fun onLoginChange(user: String, pass: String) {
-        _uiState.update { currentState ->
-            currentState.copy(
-                user = user,
-                password = pass
-            )
-        }
-    }
-
-    fun onLoginClicked(onLoginSuccess: () -> Unit) {
-        viewModelScope.launch {
-            // Reset error before attempting
-            _uiState.update { it.copy(showError = false) }
-
-            if (_uiState.value.user == "admin" && _uiState.value.password == "123") {
-                // Navigate on success
-                onLoginSuccess()
-            } else {
-                // Show error
-                _uiState.update { it.copy(showError = true) }
-            }
+    fun login(onSuccess: () -> Unit) {
+        if (username.value == "admin" && password.value == "123") {
+            loginError.value = ""
+            onSuccess()
+        } else {
+            loginError.value = "Usuario o contraseña incorrectos"
         }
     }
 }
