@@ -56,6 +56,17 @@ fun MenuScreen(navController: NavController) {
         ) {
             Text("Eliminar Torre")
         }
+
+        Button(
+            onClick = {
+                navController.navigate(AppScreens.LoginScreen.route) {
+                    popUpTo(0)
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Cerrar Sesión")
+        }
     }
 }
 
