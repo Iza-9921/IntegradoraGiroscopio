@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.juego.ui.components.texts.Title
+import com.example.juego.ui.navigation.AppScreens
 import com.example.juego.ui.theme.JuegoTheme
 
 @Composable
@@ -29,17 +30,17 @@ fun MenuScreen(navController: NavController) {
         Title("Torre de Equilibrio")
 
         Button(
-            onClick = { navController.navigate("game") },
+            onClick = { navController.navigate(AppScreens.GamePlayScreen.route) },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Iniciar Juego")
         }
 
         Button(
-            onClick = { /* TODO: Navegar a la pantalla de edición de usuario */ },
+            onClick = { navController.navigate(AppScreens.TiendaScreen.route) },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Editar usuario")
+            Text("Tienda (Editar Torre)")
         }
 
         Button(

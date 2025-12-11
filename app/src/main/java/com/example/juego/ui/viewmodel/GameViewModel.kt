@@ -2,11 +2,13 @@ package com.example.juego.ui.viewmodel
 
 import android.app.Application
 import android.content.Context
+import android.graphics.Color as AndroidColor
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
@@ -33,11 +35,15 @@ class GameViewModel(application: Application) : AndroidViewModel(application), S
     private val _isGameOver = MutableStateFlow(false)
     val isGameOver: StateFlow<Boolean> = _isGameOver
 
+    private val _platformColor = MutableStateFlow(Color.Gray)
+    val platformColor: StateFlow<Color> = _platformColor
+
     private var screenWidth = 0f
     private var screenHeight = 0f
     private var screenSizeSet = false
 
     init {
+        loadPlatformColor()
         sensorManager.registerListener(this, gyroscope, SensorManager.SENSOR_DELAY_GAME)
         viewModelScope.launch {
             while (true) {
@@ -47,6 +53,21 @@ class GameViewModel(application: Application) : AndroidViewModel(application), S
                 delay(16) // ~60 FPS
             }
         }
+    }
+
+    private fun loadPlatformColor() {
+        val sharedPref = getApplication<Application>().getSharedPreferences("GamePrefs", Context.MODE_PRIVATE)
+        val colorHex = sharedPref.getString("theme_color", "#808080") ?: "#808080"
+        try {
+            val colorInt = AndroidColor.parseColor(colorHex)
+            _platformColor.value = Color(colorInt)
+        } catch (e: IllegalArgumentException) {
+            _platformColor.value = Color.Gray
+        }
+    }
+
+    fun refreshColor() {
+        loadPlatformColor()
     }
 
     fun setScreenSize(width: Float, height: Float) {
@@ -97,6 +118,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application), S
         ballVelocity = Offset(x = 5f, y = 5f)
         _score.value = 0
         _isGameOver.value = false
+        loadPlatformColor()
     }
 
     override fun onSensorChanged(event: SensorEvent?) {

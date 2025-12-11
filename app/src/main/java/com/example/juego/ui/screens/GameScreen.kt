@@ -1,4 +1,3 @@
-
 package com.example.juego.ui.screens
 
 import android.Manifest
@@ -24,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.juego.ui.navigation.AppScreens
 import com.example.juego.ui.theme.JuegoTheme
 import com.example.juego.ui.viewmodel.GameViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -39,7 +39,7 @@ fun GameMenuScreen(navController: NavController) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Button(onClick = { navController.navigate("gameplay") }) {
+            Button(onClick = { navController.navigate(AppScreens.GamePlayScreen.route) }) {
                 Text("Iniciar Juego")
             }
         }
@@ -48,16 +48,18 @@ fun GameMenuScreen(navController: NavController) {
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun GamePlayScreen(navController: NavController) {
+fun GameScreen(navController: NavController) {
     val gameViewModel: GameViewModel = viewModel()
     val sensorPermissionState = rememberPermissionState(Manifest.permission.BODY_SENSORS)
     val platformOffset by gameViewModel.platformOffset.collectAsState()
     val ballPosition by gameViewModel.ballPosition.collectAsState()
     val score by gameViewModel.score.collectAsState()
     val isGameOver by gameViewModel.isGameOver.collectAsState()
+    val platformColor by gameViewModel.platformColor.collectAsState()
 
     LaunchedEffect(Unit) {
         sensorPermissionState.launchPermissionRequest()
+        gameViewModel.refreshColor()
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -69,7 +71,7 @@ fun GamePlayScreen(navController: NavController) {
 
             // Dibuja la plataforma
             drawRect(
-                color = Color.Gray,
+                color = platformColor,
                 topLeft = Offset(x = (size.width - platformWidth) / 2 + platformOffset.x, y = platformY),
                 size = androidx.compose.ui.geometry.Size(platformWidth, platformHeight)
             )
@@ -112,6 +114,6 @@ fun GameMenuScreenPreview() {
 @Composable
 fun GamePlayScreenPreview() {
     JuegoTheme {
-        GamePlayScreen(rememberNavController())
+        GameScreen(rememberNavController())
     }
 }

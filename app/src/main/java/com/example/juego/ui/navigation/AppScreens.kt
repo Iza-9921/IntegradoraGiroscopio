@@ -1,7 +1,11 @@
 package com.example.juego.ui.navigation
 
 sealed class AppScreens(val route: String) {
-    object LoginScreen : AppScreens("login_screen")
-    object GameScreen : AppScreens("game_screen")
-    object RankingScreen : AppScreens("ranking_screen")
+    object LoginScreen : AppScreens("login")
+    object RegisterScreen : AppScreens("register")
+    object MenuScreen : AppScreens("menu")
+    object GameMenuScreen : AppScreens("game")
+    object GamePlayScreen : AppScreens("gameplay")
+    object TiendaScreen : AppScreens("tienda")
+    object ForgotPasswordScreen : AppScreens("forgot_password")
 }
