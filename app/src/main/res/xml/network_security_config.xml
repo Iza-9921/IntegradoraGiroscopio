@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
+    <!-- Configuración específica para desarrollo -->
     <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">10.0.2.2</domain>
-        <domain includeSubdomains="true">192.168.0.5</domain>
+        <!-- Agrega TODAS las IPs que uses -->
+        <domain includeSubdomains="true">192.168.107.19</domain> <!-- Tu IP actual -->
+        <domain includeSubdomains="true">192.168.0.5</domain> <!-- Otra IP posible -->
+        <domain includeSubdomains="true">192.168.0.0</domain> <!-- Rango completo -->
+        <domain includeSubdomains="true">10.0.2.2</domain> <!-- Emulador -->
+        <domain includeSubdomains="true">10.0.0.0</domain> <!-- Rango 10.x -->
         <domain includeSubdomains="true">localhost</domain>
         <domain includeSubdomains="true">127.0.0.1</domain>
     </domain-config>
 
-    <base-config cleartextTrafficPermitted="false">
+    <!-- O mejor aún, para desarrollo permite todo cleartext -->
+    <base-config cleartextTrafficPermitted="true">
         <trust-anchors>
             <certificates src="system" />
             <certificates src="user" />
