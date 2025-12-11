@@ -2,18 +2,36 @@ package com.example.juego.ui.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.juego.data.repository.UserRepository
+import kotlinx.coroutines.launch
 
 class LoginViewModel : ViewModel() {
+    private val repository = UserRepository()
+
     var password = mutableStateOf("")
     var username = mutableStateOf("")
     var loginError = mutableStateOf("")
+    var isLoading = mutableStateOf(false)
 
     fun login(onSuccess: () -> Unit) {
-        if (username.value == "admin" && password.value == "123") {
-            loginError.value = ""
-            onSuccess()
-        } else {
-            loginError.value = "Usuario o contraseña incorrectos"
+        if (username.value.isBlank() || password.value.isBlank()) {
+            loginError.value = "Por favor ingrese usuario y contraseña"
+            return
+        }
+
+        isLoading.value = true
+        loginError.value = ""
+
+        viewModelScope.launch {
+            val result = repository.login(username.value, password.value)
+            isLoading.value = false
+            
+            if (result.isSuccess) {
+                onSuccess()
+            } else {
+                loginError.value = "Error al iniciar sesión: ${result.exceptionOrNull()?.message}"
+            }
         }
     }
 }

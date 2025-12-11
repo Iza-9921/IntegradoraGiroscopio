@@ -1,6 +1,5 @@
 package com.example.juego.ui.screens
 
-import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -8,31 +7,26 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.juego.R
 import com.example.juego.ui.components.buttons.PrimaryButton
 import com.example.juego.ui.components.images.CircularImage
 import com.example.juego.ui.components.texts.Title
+import com.example.juego.ui.viewmodel.RegisterViewModel
 
 @Composable
-fun RegisterScreen(navController: NavController) {
-    // estados del formulario
-    var nombre by remember { mutableStateOf("") }
-    var apellido by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
-
+fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = viewModel()) {
+    
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -45,9 +39,9 @@ fun RegisterScreen(navController: NavController) {
 
         // Usuario
         TextField(
-            value = nombre,
+            value = viewModel.nombre.value,
             onValueChange = {
-                nombre = it
+                viewModel.nombre.value = it
             },
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Nombre") },
@@ -55,9 +49,9 @@ fun RegisterScreen(navController: NavController) {
         )
         //apellido
         TextField(
-            value = apellido,
+            value = viewModel.apellido.value,
             onValueChange = {
-                apellido = it
+                viewModel.apellido.value = it
             },
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Apellido") },
@@ -65,9 +59,9 @@ fun RegisterScreen(navController: NavController) {
         )
         // Correo
         TextField(
-            value = email,
+            value = viewModel.email.value,
             onValueChange = {
-                email = it
+                viewModel.email.value = it
             },
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Correo electronico") },
@@ -76,9 +70,9 @@ fun RegisterScreen(navController: NavController) {
         )
 
         TextField(
-            value = password,
+            value = viewModel.password.value,
             onValueChange = {
-                password = it
+                viewModel.password.value = it
             },
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Contraseña") },
@@ -86,19 +80,37 @@ fun RegisterScreen(navController: NavController) {
         )
 
         TextField(
-            value = confirmPassword,
+            value = viewModel.confirmPassword.value,
             onValueChange = {
-                confirmPassword = it
+                viewModel.confirmPassword.value = it
             },
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Confirmar contraseña") },
             singleLine = true
         )
 
+        if (viewModel.registerError.value.isNotEmpty()) {
+            Text(
+                text = viewModel.registerError.value,
+                color = Color.Red,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+        
+        if (viewModel.isLoading.value) {
+            CircularProgressIndicator()
+        }
+
         Spacer(modifier = Modifier.height(8.dp))
 
-        PrimaryButton("Registrarse") {
-
+        PrimaryButton(
+            text = "Registrarse",
+            enabled = !viewModel.isLoading.value
+        ) {
+            viewModel.register {
+                // Navegar de vuelta al login o mostrar éxito
+                navController.popBackStack() 
+            }
         }
         Spacer(modifier = Modifier.height(8.dp))
         PrimaryButton("Volver al Login") {
