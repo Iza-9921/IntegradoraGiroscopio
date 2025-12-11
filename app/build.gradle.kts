@@ -53,6 +53,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0")
     implementation("com.google.accompanist:accompanist-permissions:0.34.0")
+    // Gson for JSON serialization
+    implementation("com.google.code.gson:gson:2.10.1")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

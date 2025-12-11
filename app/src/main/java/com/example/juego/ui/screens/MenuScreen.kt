@@ -30,31 +30,31 @@ fun MenuScreen(navController: NavController) {
         Title("Torre de Equilibrio")
 
         Button(
-            onClick = { navController.navigate(AppScreens.GamePlayScreen.route) },
+            onClick = { navController.navigate(AppScreens.SeleccionarTorreScreen.route) },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Iniciar Juego")
         }
 
         Button(
-            onClick = { navController.navigate(AppScreens.TiendaScreen.route) },
+            onClick = { navController.navigate(AppScreens.VerTorresScreen.route) },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Tienda (Editar Torre)")
+            Text("Ver Torres")
         }
 
         Button(
-            onClick = { /* TODO: Navegar a la pantalla de eliminación de usuario */ },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Eliminar usuario")
-        }
-
-        Button(
-            onClick = { navController.navigate(AppScreens.CreateTowerScreen.route) },
+            onClick = { navController.navigate(AppScreens.CrearTorreScreen.route) },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Crear Torre")
+        }
+
+        Button(
+            onClick = { navController.navigate(AppScreens.EliminarTorreScreen.route) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Eliminar Torre")
         }
     }
 }

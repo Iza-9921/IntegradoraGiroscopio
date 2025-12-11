@@ -2,7 +2,6 @@ package com.example.juego.ui.viewmodel
 
 import android.app.Application
 import android.content.Context
-import android.graphics.Color as AndroidColor
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -11,12 +10,16 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.juego.ui.model.ColorAdapter
+import com.example.juego.ui.model.Torre
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class GameViewModel(application: Application) : AndroidViewModel(application), SensorEventListener {
+class GameViewModel(application: Application, private val towerName: String?) : AndroidViewModel(application), SensorEventListener {
 
     private val sensorManager = application.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private val gyroscope: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
@@ -38,12 +41,13 @@ class GameViewModel(application: Application) : AndroidViewModel(application), S
     private val _platformColor = MutableStateFlow(Color.Gray)
     val platformColor: StateFlow<Color> = _platformColor
 
-    private val _towerName = MutableStateFlow("Torre")
-    val towerName: StateFlow<String> = _towerName
-
     private var screenWidth = 0f
     private var screenHeight = 0f
     private var screenSizeSet = false
+
+    private val gson = GsonBuilder()
+        .registerTypeAdapter(Color::class.java, ColorAdapter())
+        .create()
 
     init {
         loadTowerData()
@@ -59,19 +63,39 @@ class GameViewModel(application: Application) : AndroidViewModel(application), S
     }
 
     private fun loadTowerData() {
+        if (towerName == null) return
+
         val sharedPref = getApplication<Application>().getSharedPreferences("GamePrefs", Context.MODE_PRIVATE)
-        val colorHex = sharedPref.getString("theme_color", "#808080") ?: "#808080"
-        _towerName.value = sharedPref.getString("tower_name", "Torre") ?: "Torre"
-        try {
-            val colorInt = AndroidColor.parseColor(colorHex)
-            _platformColor.value = Color(colorInt)
-        } catch (e: IllegalArgumentException) {
-            _platformColor.value = Color.Gray
+        val json = sharedPref.getString("towers", null)
+        if (json == null) return
+
+        val type = object : TypeToken<List<Torre>>() {}.type
+        val towers: List<Torre> = gson.fromJson(json, type)
+
+        val currentTower = towers.find { it.name == towerName }
+        if (currentTower != null) {
+            _platformColor.value = currentTower.color
         }
     }
 
-    fun refreshTowerData() {
-        loadTowerData()
+    private fun updateHighScore() {
+        val sharedPref = getApplication<Application>().getSharedPreferences("GamePrefs", Context.MODE_PRIVATE) ?: return
+        val json = sharedPref.getString("towers", null)
+        val type = object : TypeToken<MutableList<Torre>>() {}.type
+        val towers: MutableList<Torre> = if (json == null) mutableListOf() else gson.fromJson(json, type)
+
+        val towerIndex = towers.indexOfFirst { it.name == towerName }
+        if (towerIndex != -1) {
+            val currentTower = towers[towerIndex]
+            if (_score.value > currentTower.puntuacion) {
+                towers[towerIndex] = currentTower.copy(puntuacion = _score.value)
+
+                with(sharedPref.edit()) {
+                    putString("towers", gson.toJson(towers))
+                    apply()
+                }
+            }
+        }
     }
 
     fun setScreenSize(width: Float, height: Float) {
@@ -84,12 +108,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application), S
     }
 
     private fun updateGame() {
-        if (!screenSizeSet) return // Don't update game until screen size is known
+        if (!screenSizeSet) return
 
         var currentBallPosition = _ballPosition.value
         currentBallPosition += ballVelocity
 
-        // Wall collisions
         if (currentBallPosition.x < 0 || currentBallPosition.x > screenWidth) {
             ballVelocity = ballVelocity.copy(x = -ballVelocity.x)
         }
@@ -97,7 +120,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application), S
             ballVelocity = ballVelocity.copy(y = -ballVelocity.y)
         }
 
-        // Platform collision
         val platformWidth = 300f
         val platformY = screenHeight - 50f
         val platformX = (screenWidth - platformWidth) / 2 + _platformOffset.value.x
@@ -109,9 +131,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application), S
             _score.value++
         }
 
-        // Game over condition
         if (currentBallPosition.y > screenHeight) {
             _isGameOver.value = true
+            updateHighScore()
         }
 
         _ballPosition.value = currentBallPosition
@@ -122,7 +144,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application), S
         ballVelocity = Offset(x = 5f, y = 5f)
         _score.value = 0
         _isGameOver.value = false
-        loadTowerData()
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
@@ -136,9 +157,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application), S
         }
     }
 
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        // Not used
-    }
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
     override fun onCleared() {
         super.onCleared()

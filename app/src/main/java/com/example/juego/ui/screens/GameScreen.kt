@@ -1,6 +1,7 @@
 package com.example.juego.ui.screens
 
 import android.Manifest
+import android.app.Application
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -18,49 +18,34 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.juego.ui.navigation.AppScreens
 import com.example.juego.ui.theme.JuegoTheme
 import com.example.juego.ui.viewmodel.GameViewModel
+import com.example.juego.ui.viewmodel.GameViewModelFactory
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 
-@Composable
-fun GameMenuScreen(navController: NavController) {
-    Scaffold { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Button(onClick = { navController.navigate(AppScreens.GamePlayScreen.route) }) {
-                Text("Iniciar Juego")
-            }
-        }
-    }
-}
-
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun GameScreen(navController: NavController) {
-    val gameViewModel: GameViewModel = viewModel()
+fun GamePlayScreen(navController: NavController, towerName: String?) {
+    val application = LocalContext.current.applicationContext as Application
+    val factory = GameViewModelFactory(application, towerName)
+    val gameViewModel: GameViewModel = viewModel(factory = factory)
+
     val sensorPermissionState = rememberPermissionState(Manifest.permission.BODY_SENSORS)
     val platformOffset by gameViewModel.platformOffset.collectAsState()
     val ballPosition by gameViewModel.ballPosition.collectAsState()
     val score by gameViewModel.score.collectAsState()
     val isGameOver by gameViewModel.isGameOver.collectAsState()
     val platformColor by gameViewModel.platformColor.collectAsState()
-    val towerName by gameViewModel.towerName.collectAsState()
 
     LaunchedEffect(Unit) {
         sensorPermissionState.launchPermissionRequest()
-        gameViewModel.refreshTowerData()
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -70,14 +55,12 @@ fun GameScreen(navController: NavController) {
             val platformHeight = 50f
             val platformY = size.height - platformHeight
 
-            // Dibuja la plataforma
             drawRect(
                 color = platformColor,
                 topLeft = Offset(x = (size.width - platformWidth) / 2 + platformOffset.x, y = platformY),
                 size = androidx.compose.ui.geometry.Size(platformWidth, platformHeight)
             )
 
-            // Dibuja la bola
             drawCircle(
                 color = Color.Red,
                 radius = 20f,
@@ -98,19 +81,8 @@ fun GameScreen(navController: NavController) {
                 }
             }
         } else {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = towerName, color = Color.Black)
-                Text(text = "Puntuación: $score", color = Color.Black)
-            }
+            Text(text = "Puntuación: $score", modifier = Modifier.padding(16.dp), color = Color.Black)
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GameMenuScreenPreview() {
-    JuegoTheme {
-        GameMenuScreen(rememberNavController())
     }
 }
 
@@ -118,6 +90,6 @@ fun GameMenuScreenPreview() {
 @Composable
 fun GamePlayScreenPreview() {
     JuegoTheme {
-        GameScreen(rememberNavController())
+        GamePlayScreen(rememberNavController(), towerName = "PreviewTorre")
     }
 }
