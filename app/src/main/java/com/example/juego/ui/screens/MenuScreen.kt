@@ -51,10 +51,10 @@ fun MenuScreen(navController: NavController) {
         }
 
         Button(
-            onClick = { /* TODO: Navegar a la pantalla de agregación de usuario */ },
+            onClick = { navController.navigate(AppScreens.CreateTowerScreen.route) },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Agregar usuario")
+            Text("Crear Torre")
         }
     }
 }

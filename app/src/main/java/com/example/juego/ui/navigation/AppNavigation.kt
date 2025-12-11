@@ -5,6 +5,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.juego.ui.screens.CrearTorreScreen
 import com.example.juego.ui.screens.GameMenuScreen
 import com.example.juego.ui.screens.GameScreen
 import com.example.juego.ui.screens.LoginScreen
@@ -49,6 +50,10 @@ fun AppNavigation() {
                 viewModel = viewModel,
                 onBackClick = { navController.popBackStack() }
             )
+        }
+        
+        composable(AppScreens.CreateTowerScreen.route) {
+            CrearTorreScreen(navController = navController)
         }
 
         composable(AppScreens.ForgotPasswordScreen.route) {

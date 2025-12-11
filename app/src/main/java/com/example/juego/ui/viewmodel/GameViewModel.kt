@@ -38,12 +38,15 @@ class GameViewModel(application: Application) : AndroidViewModel(application), S
     private val _platformColor = MutableStateFlow(Color.Gray)
     val platformColor: StateFlow<Color> = _platformColor
 
+    private val _towerName = MutableStateFlow("Torre")
+    val towerName: StateFlow<String> = _towerName
+
     private var screenWidth = 0f
     private var screenHeight = 0f
     private var screenSizeSet = false
 
     init {
-        loadPlatformColor()
+        loadTowerData()
         sensorManager.registerListener(this, gyroscope, SensorManager.SENSOR_DELAY_GAME)
         viewModelScope.launch {
             while (true) {
@@ -55,9 +58,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application), S
         }
     }
 
-    private fun loadPlatformColor() {
+    private fun loadTowerData() {
         val sharedPref = getApplication<Application>().getSharedPreferences("GamePrefs", Context.MODE_PRIVATE)
         val colorHex = sharedPref.getString("theme_color", "#808080") ?: "#808080"
+        _towerName.value = sharedPref.getString("tower_name", "Torre") ?: "Torre"
         try {
             val colorInt = AndroidColor.parseColor(colorHex)
             _platformColor.value = Color(colorInt)
@@ -66,8 +70,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application), S
         }
     }
 
-    fun refreshColor() {
-        loadPlatformColor()
+    fun refreshTowerData() {
+        loadTowerData()
     }
 
     fun setScreenSize(width: Float, height: Float) {
@@ -118,7 +122,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application), S
         ballVelocity = Offset(x = 5f, y = 5f)
         _score.value = 0
         _isGameOver.value = false
-        loadPlatformColor()
+        loadTowerData()
     }
 
     override fun onSensorChanged(event: SensorEvent?) {

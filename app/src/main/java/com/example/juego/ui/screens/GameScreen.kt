@@ -56,10 +56,11 @@ fun GameScreen(navController: NavController) {
     val score by gameViewModel.score.collectAsState()
     val isGameOver by gameViewModel.isGameOver.collectAsState()
     val platformColor by gameViewModel.platformColor.collectAsState()
+    val towerName by gameViewModel.towerName.collectAsState()
 
     LaunchedEffect(Unit) {
         sensorPermissionState.launchPermissionRequest()
-        gameViewModel.refreshColor()
+        gameViewModel.refreshTowerData()
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -97,7 +98,10 @@ fun GameScreen(navController: NavController) {
                 }
             }
         } else {
-            Text(text = "Puntuación: $score", modifier = Modifier.padding(16.dp), color = Color.Black)
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(text = towerName, color = Color.Black)
+                Text(text = "Puntuación: $score", color = Color.Black)
+            }
         }
     }
 }

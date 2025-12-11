@@ -7,5 +7,6 @@ sealed class AppScreens(val route: String) {
     object GameMenuScreen : AppScreens("game")
     object GamePlayScreen : AppScreens("gameplay")
     object TiendaScreen : AppScreens("tienda")
+    object CreateTowerScreen : AppScreens("create_tower")
     object ForgotPasswordScreen : AppScreens("forgot_password")
 }
