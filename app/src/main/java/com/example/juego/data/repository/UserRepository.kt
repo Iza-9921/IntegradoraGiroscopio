@@ -38,29 +38,5 @@ class UserRepository {
         }
     }
 
-    suspend fun updatePlayer(id: Int, player: Jugador): Result<Jugador> {
-        return try {
-            val response = api.updatePlayer(id, player)
-            if (response.isSuccessful && response.body() != null) {
-                Result.success(response.body()!!)
-            } else {
-                Result.failure(Exception("Actualización fallida: ${response.code()}"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
 
-    suspend fun deletePlayer(id: Int): Result<Boolean> {
-        return try {
-            val response = api.deletePlayer(id)
-            if (response.isSuccessful) {
-                Result.success(true)
-            } else {
-                Result.failure(Exception("Eliminación fallida: ${response.code()}"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
 }
