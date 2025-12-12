@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.juego.data.model.UserManager
 import com.example.juego.ui.components.texts.Title
 import com.example.juego.ui.navigation.AppScreens
 import com.example.juego.ui.theme.JuegoTheme
@@ -59,6 +60,9 @@ fun MenuScreen(navController: NavController) {
 
         Button(
             onClick = {
+                // ¡Aquí está la magia! Borramos los datos del jugador.
+                UserManager.logout()
+                // Y después, lo llevamos a la pantalla de inicio de sesión.
                 navController.navigate(AppScreens.LoginScreen.route) {
                     popUpTo(0)
                 }

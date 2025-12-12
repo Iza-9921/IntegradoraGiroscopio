@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.juego.ui.screens.CrearTorreScreen
+import com.example.juego.ui.screens.EditarTorreScreen
 import com.example.juego.ui.screens.EliminarTorreScreen
 import com.example.juego.ui.screens.GamePlayScreen
 import com.example.juego.ui.screens.LoginScreen
@@ -60,6 +61,16 @@ fun AppNavigation() {
 
         composable(AppScreens.EliminarTorreScreen.route) {
             EliminarTorreScreen(navController = navController)
+        }
+
+        composable(
+            route = AppScreens.EditarTorreScreen.route,
+            arguments = listOf(navArgument("towerName") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val towerName = backStackEntry.arguments?.getString("towerName")
+            if (towerName != null) {
+                EditarTorreScreen(navController = navController, towerName = towerName)
+            }
         }
 
         composable(AppScreens.ForgotPasswordScreen.route) {

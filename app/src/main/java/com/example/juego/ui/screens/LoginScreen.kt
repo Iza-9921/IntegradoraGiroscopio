@@ -29,6 +29,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.juego.R
+import com.example.juego.data.model.Jugador
 import com.example.juego.ui.components.buttons.PrimaryButton
 import com.example.juego.ui.components.images.CircularImage
 import com.example.juego.ui.components.inputs.PasswordField
@@ -72,8 +73,10 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController) {
         }
 
         PrimaryButton("Iniciar sesion") {
-            viewModel.login {
-                // Navegar a "home" — en tu NavHost la pantalla principal se llama "home"
+            // Ahora, cuando llamamos a login, esperamos recibir los datos del jugador.
+            viewModel.login { jugador: Jugador ->
+                // Una vez que el inicio de sesión es exitoso y tenemos los datos del jugador,
+                // navegamos al menú principal.
                 navController.navigate("menu") {
                     popUpTo("login") { inclusive = true } // Evita volver al login
                 }

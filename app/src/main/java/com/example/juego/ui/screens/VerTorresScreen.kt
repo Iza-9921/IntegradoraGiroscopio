@@ -1,6 +1,7 @@
 package com.example.juego.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,7 @@ import androidx.navigation.NavController
 import com.example.juego.ui.components.buttons.PrimaryButton
 import com.example.juego.ui.components.texts.Title
 import com.example.juego.ui.model.Torre
+import com.example.juego.ui.navigation.AppScreens
 import com.example.juego.ui.viewmodel.VerTorresViewModel
 
 @Composable
@@ -46,7 +48,11 @@ fun VerTorresScreen(navController: NavController) {
         } else {
             LazyColumn(modifier = Modifier.weight(1f)) {
                 items(towers) { tower ->
-                    TorreItem(tower)
+                    // Ahora, cada torre en la lista te llevará a la pantalla de edición cuando la pulses.
+                    TorreItem(tower) {
+                        // Navegamos a la pantalla de edición, pasándole el nombre de la torre para saber cuál editar.
+                        navController.navigate("${AppScreens.EditarTorreScreen.route}/${tower.name}")
+                    }
                 }
             }
         }
@@ -57,12 +63,14 @@ fun VerTorresScreen(navController: NavController) {
     }
 }
 
+// He modificado este elemento para que se pueda hacer clic en él.
 @Composable
-fun TorreItem(torre: Torre) {
+fun TorreItem(torre: Torre, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
+            .clickable(onClick = onClick) // Hacemos que toda la tarjeta sea pulsable.
     ) {
         Row(
             modifier = Modifier

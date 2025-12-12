@@ -9,5 +9,6 @@ sealed class AppScreens(val route: String) {
     object VerTorresScreen : AppScreens("ver_torres")
     object SeleccionarTorreScreen : AppScreens("seleccionar_torre")
     object EliminarTorreScreen : AppScreens("eliminar_torre")
+    object EditarTorreScreen : AppScreens("editar_torre/{towerName}")
     object ForgotPasswordScreen : AppScreens("forgot_password")
 }
