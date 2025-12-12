@@ -10,6 +10,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.juego.data.model.UserManager
 import com.example.juego.ui.model.ColorAdapter
 import com.example.juego.ui.model.Torre
 import com.google.gson.GsonBuilder
@@ -65,34 +66,48 @@ class GameViewModel(application: Application, private val towerName: String?) : 
     private fun loadTowerData() {
         if (towerName == null) return
 
+        val currentUser = UserManager.currentUser.value ?: return
+        val userId = currentUser.id ?: return
+
         val sharedPref = getApplication<Application>().getSharedPreferences("GamePrefs", Context.MODE_PRIVATE)
-        val json = sharedPref.getString("towers", null)
+        val json = sharedPref.getString("towers_by_user", null)
         if (json == null) return
 
-        val type = object : TypeToken<List<Torre>>() {}.type
-        val towers: List<Torre> = gson.fromJson(json, type)
+        val type = object : TypeToken<Map<Int, List<Torre>>>() {}.type
+        val allTowers: Map<Int, List<Torre>> = gson.fromJson(json, type)
 
-        val currentTower = towers.find { it.name == towerName }
+        val userTowers = allTowers[userId] ?: return
+
+        val currentTower = userTowers.find { it.name == towerName }
         if (currentTower != null) {
             _platformColor.value = currentTower.color
         }
     }
 
     private fun updateHighScore() {
+        val currentUser = UserManager.currentUser.value ?: return
+        val userId = currentUser.id ?: return
+
         val sharedPref = getApplication<Application>().getSharedPreferences("GamePrefs", Context.MODE_PRIVATE) ?: return
-        val json = sharedPref.getString("towers", null)
-        val type = object : TypeToken<MutableList<Torre>>() {}.type
-        val towers: MutableList<Torre> = if (json == null) mutableListOf() else gson.fromJson(json, type)
+        val json = sharedPref.getString("towers_by_user", null)
+        val type = object : TypeToken<MutableMap<Int, MutableList<Torre>>>() {}.type
+        val allTowers: MutableMap<Int, MutableList<Torre>> = if (json == null) mutableMapOf() else gson.fromJson(json, type)
 
-        val towerIndex = towers.indexOfFirst { it.name == towerName }
-        if (towerIndex != -1) {
-            val currentTower = towers[towerIndex]
-            if (_score.value > currentTower.puntuacion) {
-                towers[towerIndex] = currentTower.copy(puntuacion = _score.value)
+        val userTowers = allTowers[userId]
+        if (userTowers != null) {
+            val towerIndex = userTowers.indexOfFirst { it.name == towerName }
+            if (towerIndex != -1) {
+                val currentTower = userTowers[towerIndex]
+                if (_score.value > currentTower.puntuacion) {
+                    userTowers[towerIndex] = currentTower.copy(puntuacion = _score.value)
+                    
+                    // Actualizamos el mapa principal
+                    allTowers[userId] = userTowers
 
-                with(sharedPref.edit()) {
-                    putString("towers", gson.toJson(towers))
-                    apply()
+                    with(sharedPref.edit()) {
+                        putString("towers_by_user", gson.toJson(allTowers))
+                        apply()
+                    }
                 }
             }
         }
