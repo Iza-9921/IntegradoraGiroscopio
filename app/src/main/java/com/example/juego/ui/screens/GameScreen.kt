@@ -62,7 +62,7 @@ fun GamePlayScreen(navController: NavController, towerName: String?) {
             )
 
             drawCircle(
-                color = Color.Red,
+                color = platformColor, // Use the platform's color for the ball
                 radius = 20f,
                 center = ballPosition
             )

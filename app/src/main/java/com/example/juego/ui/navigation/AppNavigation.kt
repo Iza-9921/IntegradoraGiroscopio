@@ -64,7 +64,7 @@ fun AppNavigation() {
         }
 
         composable(
-            route = AppScreens.EditarTorreScreen.route,
+            route = AppScreens.EditarTorreScreen.route + "/{towerName}",
             arguments = listOf(navArgument("towerName") { type = NavType.StringType })
         ) { backStackEntry ->
             val towerName = backStackEntry.arguments?.getString("towerName")
