@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,12 +32,14 @@ import androidx.navigation.NavController
 import com.example.juego.ui.components.buttons.PrimaryButton
 import com.example.juego.ui.components.texts.Title
 import com.example.juego.ui.viewmodel.CrearTorreViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun CrearTorreScreen(navController: NavController) {
     val viewModel: CrearTorreViewModel = viewModel()
     var towerName by remember { mutableStateOf("") }
     var selectedColor by remember { mutableStateOf<Color?>(null) }
+    val scope = rememberCoroutineScope()
 
     val colors = listOf(Color.Red, Color.Green, Color.Blue, Color.Yellow, Color.Magenta)
 
@@ -81,8 +84,12 @@ fun CrearTorreScreen(navController: NavController) {
 
         PrimaryButton("Guardar Torre") {
             if (towerName.isNotBlank() && selectedColor != null) {
-                viewModel.saveTower(towerName, selectedColor!!)
-                navController.popBackStack() // Go back to the menu
+                scope.launch {
+                    val success = viewModel.saveTower(towerName, selectedColor!!)
+                    if (success) {
+                        navController.popBackStack()
+                    }
+                }
             }
         }
 

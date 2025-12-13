@@ -3,6 +3,8 @@ package com.example.juego.ui.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.juego.data.model.UserManager
+import com.example.juego.data.network.RetrofitClient
 import com.example.juego.ui.model.Torre
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -10,18 +12,32 @@ import kotlinx.coroutines.launch
 
 class SeleccionarTorreViewModel(application: Application) : AndroidViewModel(application) {
 
+    // lista de torres disponibles del jugador
     private val _towers = MutableStateFlow<List<Torre>>(emptyList())
     val towers: StateFlow<List<Torre>> = _towers
 
-    private val crearTorreViewModel = CrearTorreViewModel(application)
+    // cliente retrofit para la api
+    private val api = RetrofitClient.instance
 
+    // al crear el viewmodel se cargan las torres
     init {
         loadTowers()
     }
 
+    // obtiene las torres del jugador actual
     private fun loadTowers() {
         viewModelScope.launch {
-            _towers.value = crearTorreViewModel.getTowers()
+            val currentUser = UserManager.currentUser.value ?: return@launch
+            val userId = currentUser.id ?: return@launch
+
+            try {
+                val response = api.getTowersByPlayer(userId)
+                if (response.isSuccessful) {
+                    _towers.value = response.body() ?: emptyList()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }

@@ -37,21 +37,17 @@ import com.example.juego.ui.components.texts.Title
 import com.example.juego.ui.viewmodel.EditarTorreViewModel
 import com.example.juego.ui.viewmodel.EditarTorreViewModelFactory
 
-// Esta pantalla permite al jugador editar una torre que ya ha creado.
 @Composable
 fun EditarTorreScreen(navController: NavController, towerName: String) {
-    // Usamos la "fábrica" para crear el ViewModel, pasándole el nombre de la torre a editar.
     val application = LocalContext.current.applicationContext as Application
     val factory = EditarTorreViewModelFactory(application, towerName)
     val viewModel: EditarTorreViewModel = viewModel(factory = factory)
 
     val torre by viewModel.torre.collectAsState()
 
-    // Estas variables guardan los nuevos datos (nombre y color) que el jugador elija.
     var newTowerName by remember { mutableStateOf("") }
     var selectedColor by remember { mutableStateOf<Color?>(null) }
 
-    // Cuando la torre se carga, rellenamos los campos con sus datos actuales.
     LaunchedEffect(torre) {
         torre?.let {
             newTowerName = it.name
@@ -102,8 +98,10 @@ fun EditarTorreScreen(navController: NavController, towerName: String) {
 
         PrimaryButton("Guardar Cambios") {
             if (newTowerName.isNotBlank() && selectedColor != null) {
-                viewModel.updateTower(newTowerName, selectedColor!!)
-                navController.popBackStack() // Volvemos a la lista de torres.
+                // Ahora pasamos una lambda para manejar el éxito de la actualización
+                viewModel.updateTower(newTowerName, selectedColor!!) {
+                    navController.popBackStack()
+                }
             }
         }
 

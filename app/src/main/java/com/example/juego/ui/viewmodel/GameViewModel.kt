@@ -11,8 +11,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.juego.data.model.UserManager
+import com.example.juego.data.network.RetrofitClient
 import com.example.juego.ui.model.ColorAdapter
-import com.example.juego.ui.model.Torre
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.delay
@@ -46,9 +46,11 @@ class GameViewModel(application: Application, private val towerName: String?) : 
     private var screenHeight = 0f
     private var screenSizeSet = false
 
-    private val gson = GsonBuilder()
-        .registerTypeAdapter(Color::class.java, ColorAdapter())
-        .create()
+    private val api = RetrofitClient.instance
+
+    // Store the tower ID to update the score later
+    private var currentTowerId: Int? = null
+    private var currentHighScore: Int = 0
 
     init {
         loadTowerData()
@@ -69,45 +71,46 @@ class GameViewModel(application: Application, private val towerName: String?) : 
         val currentUser = UserManager.currentUser.value ?: return
         val userId = currentUser.id ?: return
 
-        val sharedPref = getApplication<Application>().getSharedPreferences("GamePrefs", Context.MODE_PRIVATE)
-        val json = sharedPref.getString("towers_by_user", null)
-        if (json == null) return
-
-        val type = object : TypeToken<Map<Int, List<Torre>>>() {}.type
-        val allTowers: Map<Int, List<Torre>> = gson.fromJson(json, type)
-
-        val userTowers = allTowers[userId] ?: return
-
-        val currentTower = userTowers.find { it.name == towerName }
-        if (currentTower != null) {
-            _platformColor.value = currentTower.color
+        viewModelScope.launch {
+            try {
+                val response = api.getTowersByPlayer(userId)
+                if (response.isSuccessful) {
+                    val towers = response.body() ?: emptyList()
+                    val currentTower = towers.find { it.name == towerName }
+                    if (currentTower != null) {
+                        _platformColor.value = currentTower.color
+                        currentTowerId = currentTower.id
+                        currentHighScore = currentTower.puntuacion
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
     private fun updateHighScore() {
-        val currentUser = UserManager.currentUser.value ?: return
-        val userId = currentUser.id ?: return
-
-        val sharedPref = getApplication<Application>().getSharedPreferences("GamePrefs", Context.MODE_PRIVATE) ?: return
-        val json = sharedPref.getString("towers_by_user", null)
-        val type = object : TypeToken<MutableMap<Int, MutableList<Torre>>>() {}.type
-        val allTowers: MutableMap<Int, MutableList<Torre>> = if (json == null) mutableMapOf() else gson.fromJson(json, type)
-
-        val userTowers = allTowers[userId]
-        if (userTowers != null) {
-            val towerIndex = userTowers.indexOfFirst { it.name == towerName }
-            if (towerIndex != -1) {
-                val currentTower = userTowers[towerIndex]
-                if (_score.value > currentTower.puntuacion) {
-                    userTowers[towerIndex] = currentTower.copy(puntuacion = _score.value)
+        if (currentTowerId == null) return
+        
+        if (_score.value > currentHighScore) {
+             viewModelScope.launch {
+                try {
+                    val currentUser = UserManager.currentUser.value ?: return@launch
+                    val userId = currentUser.id ?: return@launch
                     
-                    // Actualizamos el mapa principal
-                    allTowers[userId] = userTowers
-
-                    with(sharedPref.edit()) {
-                        putString("towers_by_user", gson.toJson(allTowers))
-                        apply()
+                    val responseList = api.getTowersByPlayer(userId)
+                    if (responseList.isSuccessful) {
+                        val towers = responseList.body() ?: emptyList()
+                        val towerToUpdate = towers.find { it.id == currentTowerId }
+                        
+                        if (towerToUpdate != null) {
+                            val updatedTower = towerToUpdate.copy(puntuacion = _score.value)
+                            api.updateTower(currentTowerId!!, updatedTower)
+                            currentHighScore = _score.value
+                        }
                     }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
             }
         }
